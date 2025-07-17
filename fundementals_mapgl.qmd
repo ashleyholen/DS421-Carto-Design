@@ -256,6 +256,8 @@ How does your choice affect the message your map conveys?
 
 Write 1–2 sentences reflecting on the **cartographic message** your choices imply.
 
+I think that the categorical styling better differentiates the income groups visually, but perhaps the continuous styling better portrays a scale of which a home stands. For example, the categorical coloring is simple to denote, but if a home is on the edge of the range, it could be grouped into a broad range and be misleading. 
+
 ------------------------------------------------------------------------
 
 ## Question: What is the poverty line for a household in Hawaii?
@@ -265,7 +267,7 @@ Can we create a map that only shows above/below the poverty line
 ```{r}
 hi_median_income <- hi_median_income |>
   mutate(
-    poverty_flag = ifelse(estimate < 30000, "Below Poverty Line", "Above Poverty Line")
+    poverty_flag = ifelse(estimate < 30650, "Below Poverty Line", "Above Poverty Line")
   )
 ```
 
@@ -294,6 +296,8 @@ mapboxgl(bounds = hi_median_income) |>
 ```
 
 ## Question: How else can we think about the poverty line and map?
+
+
 
 Hints : <https://livingwage.mit.edu/states/15>, <https://unitedforalice.org/hawaii>
 
@@ -340,9 +344,34 @@ Make your map more personal and informative!
 Instead of just `estimate`, add other descriptive info in your popup. For example, use `NAME` (tract name) or `GEOID` along with the estimate.
 
 ```{r}
-hi_median_income$popup <- glue(
-  "<strong>Tract:</strong> {hi_median_income$NAME}<br><strong>Median income:</strong> {hi_median_income$estimate}"
+hi_median_income$tooltip <- glue(
+  "{hi_median_income$NAME}\nMedian Income: ${hi_median_income$estimate}"
 )
+
+hi_map |>
+  add_fill_layer(
+    id = "hi_tracts",
+    source = hi_median_income,
+    fill_color = interpolate(
+      column = "estimate",
+      values = c(20000, 250000),
+      stops = c("lightblue", "darkblue"),
+      na_color = "lightgrey"
+    ),
+    fill_opacity = 0.5,
+    popup = "popup",
+    tooltip = "tooltip",
+    hover_options = list(
+      fill_color = "white",
+      fill_opacity = 1
+    )
+  ) |>
+  add_legend(
+    "Median Income in Hawaii",
+    values = c(20000, 250000),
+    colors = c("lightblue", "darkblue")
+  )
+
 ```
 
 Bonus: Try replacing `fill_color = "yellow"` with a color of your choice that aligns better with your map’s aesthetic.
@@ -397,7 +426,45 @@ mapboxgl(bounds = ca_income) |>
 
 ```
 
-🔍 Try: - Changing the variable to median home value- Switching the state (e.g., "HI", "NY", "TX") - Using a different styling function
+
+# 🚜 NORTH DAKOTA MAP - Per Capita Income
+```{r}
+
+# Per Capita Income in ND
+nd_income <- get_acs(
+  geography = "tract",
+  variables = "B19301_001",
+  state = "ND",
+  year = 2023,
+  geometry = TRUE
+)
+
+nd_scale <- step_quantile(
+  data = nd_income,
+  column = "estimate",
+  n = 5,
+  colors = RColorBrewer::brewer.pal(5, "RdYlGn")
+)
+
+mapboxgl(bounds = nd_income) |>
+  add_fill_layer(
+    id = "nd_tracts",
+    source = nd_income,
+    fill_color = nd_scale$expression,
+    fill_opacity = 0.5
+  ) |>
+  add_legend(
+    "Per Capita Income in North Dakota",
+    values = get_legend_labels(nd_scale, digits = 0, prefix = "$"),
+    colors = get_legend_colors(nd_scale),
+    type = "categorical"
+  )
+
+
+```
+
+
+ Try: - Changing the variable to median home value- Switching the state (e.g., "HI", "NY", "TX") - Using a different styling function
 
 ------------------------------------------------------------------------
 
