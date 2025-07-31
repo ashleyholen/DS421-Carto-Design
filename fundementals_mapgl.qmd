@@ -215,7 +215,7 @@ When designing categorical maps: - Choose palettes that are **visually distinct*
 Here’s how we apply quantile classification to Hawaii's Median Income:
 
 ```{r}
-q_class <- step_quantile(
+q_class <- step_equal_interval(
   data = hi_median_income,
   column = "estimate",
   n = 5,
@@ -252,11 +252,13 @@ Type `?step_quantile` in your console to see definitions
 
 How does your choice affect the message your map conveys?
 
+Changing the classification changes the visual distribution of the median income. When utilizing the step_quantile() function, the amount of instances per category are equivalent, thus is why we see quite a bit of homes in both the lowest and highest categories. Also, the amount between ranges are not equal to each other. This is used when you want equal amounts of instances per group. Now when using the step_equal_interval() function, there is not an equal amount of instances per category, but the amount between ranges is equivalent. When using step_quantile(), each color is visually represented evenly, but when using step_equal_interval(), there are less instances of certain colors, but the ranges are balanced. Making a decision is based on if you want the instances or the categories represented. 
+
 💬 *What looks more balanced? Which palette aligns with your intended story?*
 
 Write 1–2 sentences reflecting on the **cartographic message** your choices imply.
 
-I think that the categorical styling better differentiates the income groups visually, but perhaps the continuous styling better portrays a scale of which a home stands. For example, the categorical coloring is simple to denote, but if a home is on the edge of the range, it could be grouped into a broad range and be misleading. 
+I chose the step_equal_interval() because I wanted the map to have the ranges be equal to each other, which highlights the differences between groups. Although this hides outliers, I wanted to show numeric differences are clearly rather than balancing the color spread. Also, I think that the categorical styling better differentiates the income groups visually, but perhaps the continuous styling better portrays a scale of which a home stands. For example, the categorical coloring is simple to denote, but if a home is on the edge of the range, it could be grouped into a broad range and be misleading. 
 
 ------------------------------------------------------------------------
 
@@ -308,31 +310,37 @@ Make a binary map, two colors, representing above and below a threshold of media
 ## ✨ Add Interactivity
 
 ```{r}
+hi_median_income <- hi_median_income |>
+  mutate(
+    income_flag = ifelse(estimate < 62233, "Below $62,233", "Above $62,233")
+  )
+```
+
+
+```{r}
+
 hi_median_income$popup <- glue("<strong>GEOID: </strong>{hi_median_income$GEOID}<br><strong>Median Income: </strong>{hi_median_income$estimate}")
 
-hi_map |>
+income_colors = c("Above $62,233" = "green", "Below $62,233" = "orange")
+
+mapboxgl(bounds = hi_median_income) |>
   add_fill_layer(
     id = "hi_tracts",
     source = hi_median_income,
-    fill_color = interpolate(
-      column = "estimate",
-      values = c(20000, 250000),
-      stops = c("lightblue", "darkblue"),
-      na_color = "lightgrey"
+    fill_color = match_expr(
+      column = "income_flag",
+      values = names(income_colors),
+      stops = unname(income_colors)
     ),
-    fill_opacity = 0.5,
-    popup = "popup",
-    tooltip = "estimate",
-    hover_options = list(
-      fill_color = "yellow",
-      fill_opacity = 1
-    )
+    fill_opacity = 0.6
   ) |>
   add_legend(
-    "Median Income in Hawaii",
-    values = c(20000, 250000),
-    colors = c("lightblue", "darkblue")
+    "Median Income Status",
+    values = names(income_colors),
+    colors = unname(income_colors),
+    type = "categorical"
   )
+
 ```
 
 ------------------------------------------------------------------------
@@ -344,32 +352,42 @@ Make your map more personal and informative!
 Instead of just `estimate`, add other descriptive info in your popup. For example, use `NAME` (tract name) or `GEOID` along with the estimate.
 
 ```{r}
+
+hi_median_income <- hi_median_income |>
+  mutate(
+    income_flag = ifelse(estimate < 62233, "Below $62,233", "Above $62,233")
+  )
+
+```
+
+
+```{r}
+
 hi_median_income$tooltip <- glue(
   "{hi_median_income$NAME}\nMedian Income: ${hi_median_income$estimate}"
 )
 
-hi_map |>
+hi_median_income$popup <- glue("<strong>GEOID: </strong>{hi_median_income$GEOID}<br><strong>Median Income: </strong>{hi_median_income$estimate}")
+
+income_colors = c("Above $62,233" = "green", "Below $62,233" = "orange")
+
+mapboxgl(bounds = hi_median_income) |>
   add_fill_layer(
     id = "hi_tracts",
     source = hi_median_income,
-    fill_color = interpolate(
-      column = "estimate",
-      values = c(20000, 250000),
-      stops = c("lightblue", "darkblue"),
-      na_color = "lightgrey"
+    fill_color = match_expr(
+      column = "income_flag",
+      values = names(income_colors),
+      stops = unname(income_colors)
     ),
-    fill_opacity = 0.5,
-    popup = "popup",
-    tooltip = "tooltip",
-    hover_options = list(
-      fill_color = "white",
-      fill_opacity = 1
-    )
+    fill_opacity = 0.6, 
+    tooltip = "tooltip"
   ) |>
   add_legend(
-    "Median Income in Hawaii",
-    values = c(20000, 250000),
-    colors = c("lightblue", "darkblue")
+    "Median Income Status",
+    values = names(income_colors),
+    colors = unname(income_colors),
+    type = "categorical"
   )
 
 ```
