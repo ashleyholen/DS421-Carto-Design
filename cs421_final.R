@@ -13,20 +13,40 @@ wind_data <- st_read(here("data/NDGISHUB_Wind_Turbines/Wind_Turbines.shp"), quie
 coal_data <- st_read(here("data/Surface_and_Underground_Coal_Mines_in_the_US/CoalMines_US_EIA.shp"), quiet = TRUE)
 
 
-# Transform all to EPSG:4326 and trim to type + geometry
-oil_pts  <- oil_data  %>% st_transform(common_crs) %>% mutate(type = "Oil Rigs")      %>% select(type, geometry)
-gas_pts  <- gas_data  %>% st_transform(common_crs) %>% mutate(type = "Gas Plants")    %>% select(type, geometry)
-wind_pts <- wind_data %>% st_transform(common_crs) %>% mutate(type = "Wind Turbines") %>% select(type, geometry)
+# Transform all to EPSG:4326 and trim to type + geometry + tooltip_text
+oil_pts  <- oil_data  %>%
+  st_transform(common_crs) %>%
+  mutate(type = "Oil Rigs") %>%
+  select(type, rig, geometry)
 
-# Filter coal to North Dakota (column is uppercase 'state' in your preview)
+gas_pts  <- gas_data  %>%
+  st_transform(common_crs) %>%
+  mutate(type = "Gas Plants") %>%
+  select(type, name, geometry)
+
+wind_pts <- wind_data %>%
+  st_transform(common_crs) %>%
+  mutate(type = "Wind Turbines") %>%
+  select(type, OBSTACLENU, geometry)
+
 coal_nd  <- coal_data %>%
   filter(toupper(state) == "NORTH DAKOTA") %>%
   st_transform(common_crs) %>%
   mutate(type = "Coal Mines") %>%
-  select(type, geometry)
+  select(type, MINE_NAME, geometry)
 
-# Single combined sf
-energy_sf <- bind_rows(oil_pts, gas_pts, wind_pts, coal_nd)
+
+energy_sf <- bind_rows(oil_pts, gas_pts, wind_pts, coal_nd) %>%
+  mutate(
+    tooltip_text = case_when(
+      type == "Oil Rigs"      ~ as.character(rig),
+      type == "Gas Plants"    ~ as.character(name),
+      type == "Wind Turbines" ~ as.character(OBSTACLENU),
+      type == "Coal Mines"    ~ as.character(MINE_NAME),
+      TRUE                    ~ NA_character_
+    )
+  )
+
 
 type_colors <- c(
   "Oil Rigs"      = "orange",
@@ -66,7 +86,7 @@ server <- function(input, output, session) {
     req(nrow(sf_data) > 0)
     m <- maplibre(style = carto_style("positron")) %>%
       fit_bounds(sf_data, animate = FALSE)
-
+    
     if (identical(input$dataset, "All")) {
       # Show all types at once with categorical coloring + legend
       m %>%
@@ -82,7 +102,7 @@ server <- function(input, output, session) {
           circle_opacity = 0.85,
           circle_stroke_color = "#ffffff",
           circle_stroke_width = 1,
-          tooltip = "type",
+          tooltip = "tooltip_text",
           hover_options = list(circle_radius = 10)
           # , cluster_options = cluster_options()  # uncomment if you want clustering
         ) %>%
@@ -103,7 +123,7 @@ server <- function(input, output, session) {
           circle_opacity = 0.85,
           circle_stroke_color = "#ffffff",
           circle_stroke_width = 1,
-          tooltip = "type",
+          tooltip = "tooltip_text",
           hover_options = list(circle_radius = 11)
         )
     }
@@ -111,4 +131,5 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui, server)
+
 
