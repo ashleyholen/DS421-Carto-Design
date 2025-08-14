@@ -9,13 +9,13 @@ For my final project, I decided to create a map highlighting the location of pri
 ## Before You Begin! 📩
 To run this app on your local device, first you are to download these specificed files. You are provided with these folders in this GitHub Repostitory, located in the data folder. Download them in their entirety to your local device, since all files must be downloaded in order to support the .shp file. 
 
-- #### NDGISHUB_Wind_Turbines_-1094680039359531429 (Last Updated 8/12/2025)
-- #### OGD_GasPlants (Last Updated 8/11/2025)
-- #### OGD_Rigs (Last Updated 8/11/2025)
-- #### Surface_and_Underground_Coal_Mines_in_the_US_4558145817808566859 (Last Updated 8/4/2025)
+- #### 'NDGISHUB_Wind_Turbines_-1094680039359531429' (Last Updated 8/12/2025)
+- #### 'OGD_GasPlants' (Last Updated 8/11/2025)
+- #### 'OGD_Rigs' (Last Updated 8/11/2025)
+- #### 'Surface_and_Underground_Coal_Mines_in_the_US_4558145817808566859' (Last Updated 8/4/2025)
 
 Then, download the app file which renders the interactive map. This is located on the main branch of this repository. 
-- #### app.R
+- #### 'app.R'
 
 ⚠️ If there are issues that occur when downloading the data directly from this repository, here are the direct links to each data source. Download each folder onto your local device, unzip them since they are natively .zip files, and then create a data folder in your working directory, placing these 4 unziped folders in there for each energy source. ⚠️ 
 
