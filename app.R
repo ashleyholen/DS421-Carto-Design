@@ -3,7 +3,6 @@ library(mapgl)
 library(sf)
 library(here)
 library(dplyr)
-install.packages("rsconnect")
 library(rsconnect)
 
 common_crs <- 4326
