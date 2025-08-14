@@ -10,8 +10,8 @@ common_crs <- 4326
 # Load
 oil_data  <- st_read(here("data/OGD_Rigs/OGD_Rigs.shp"), quiet = TRUE)
 gas_data  <- st_read(here("data/OGD_GasPlants/OGD_GasPlants.shp"), quiet = TRUE)
-wind_data <- st_read(here("data/NDGISHUB_Wind_Turbines/Wind_Turbines.shp"), quiet = TRUE)
-coal_data <- st_read(here("data/Surface_and_Underground_Coal_Mines_in_the_US/CoalMines_US_EIA.shp"), quiet = TRUE)
+wind_data <- st_read(here("data/NDGISHUB_Wind_Turbines_-1094680039359531429/Wind_Turbines.shp"), quiet = TRUE)
+coal_data <- st_read(here("data/Surface_and_Underground_Coal_Mines_in_the_US_4558145817808566859/CoalMines_US_EIA.shp"), quiet = TRUE)
 
 
 # Transform all to EPSG:4326 and trim to type + geometry + tooltip_text
