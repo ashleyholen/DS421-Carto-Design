@@ -3,6 +3,7 @@ library(mapgl)
 library(sf)
 library(here)
 library(dplyr)
+library(rsconnect)
 
 common_crs <- 4326
 
@@ -63,7 +64,7 @@ ui <- fluidPage(
     sidebarPanel(
       selectInput(
         "dataset",
-        "Select dataset to display:",
+        "Select Energy Type:",
         choices = c("All", energy_types),
         selected = "Oil Rigs"
       )
@@ -131,5 +132,4 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui, server)
-
 
