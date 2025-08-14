@@ -3,6 +3,7 @@ library(mapgl)
 library(sf)
 library(here)
 library(dplyr)
+install.packages("rsconnect")
 library(rsconnect)
 
 common_crs <- 4326
@@ -64,7 +65,7 @@ ui <- fluidPage(
     sidebarPanel(
       selectInput(
         "dataset",
-        "Select Energy Type:",
+        "Select Energy Type to Display:",
         choices = c("All", energy_types),
         selected = "Oil Rigs"
       )
@@ -132,10 +133,4 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui, server)
-
-
-renv::status()
-renv::snapshot()
-
-rsconnect::writeManifest()
 
