@@ -133,3 +133,9 @@ server <- function(input, output, session) {
 
 shinyApp(ui, server)
 
+
+renv::status()
+renv::snapshot()
+
+rsconnect::writeManifest()
+
